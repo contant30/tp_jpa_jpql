@@ -50,6 +50,7 @@ public class ActeurRepositoryTest {
 
 		TypedQuery<Acteur> query = em.createQuery("SELECT a FROM Acteur a WHERE a.identite=:nom", Acteur.class);
         query.setParameter("nom","Marion Cotillard");
+
 		List<Acteur> acteurs = query.getResultList();
 
 		assertEquals(1, acteurs.size());
@@ -104,6 +105,7 @@ public class ActeurRepositoryTest {
 	 */
     @Test
     public void testExtraireActeursParPays() {
+
         TypedQuery<Acteur> query = em.createQuery(
                 "SELECT DISTINCT a FROM Acteur a JOIN a.roles r WHERE r.film.pays = :pays",
                 Acteur.class
@@ -120,7 +122,11 @@ public class ActeurRepositoryTest {
 	 */
 	@Test
 	public void testExtraireActeursParListePaysEtAnnee() {
-		TypedQuery<Acteur> query = em.createQuery("SELECT a FROM Acteur a", Acteur.class);
+
+		TypedQuery<Acteur> query = em.createQuery("SELECT a FROM Acteur a JOIN a.roles ro JOIN ro.films f JOIN f.pays p"
+                , Acteur.class);
+
+
 		List<Acteur> acteurs = query.getResultList();
 		assertEquals(24, acteurs.size());
 	}
@@ -131,7 +137,13 @@ public class ActeurRepositoryTest {
 	 */
 	@Test
 	public void testExtraireParRealisateurEntreAnnee() {
-		TypedQuery<Acteur> query = em.createQuery("SELECT a FROM Acteur a", Acteur.class);
+
+		TypedQuery<Acteur> query = em.createQuery(
+                "SELECT DISTINCT a FROM Acteur a JOIN a.roles ro JOIN ro.film f JOIN f.realisateurs rea " +
+                        "WHERE rea.identite = 'Ridley Scott' AND f.annee BETWEEN 2010 AND 2020",
+                Acteur.class);
+
+
 		List<Acteur> acteurs = query.getResultList();
 		assertEquals(27, acteurs.size());
 	}
@@ -141,7 +153,14 @@ public class ActeurRepositoryTest {
 	 */
 	@Test
 	public void testExtraireRealisateursParActeur() {
-		TypedQuery<Realisateur> query = em.createQuery("SELECT r FROM Realisateur r", Realisateur.class);
+
+        TypedQuery<Realisateur> query = em.createQuery(
+                "SELECT DISTINCT r FROM Realisateur r JOIN r.films f JOIN f.roles ro JOIN ro.acteur a WHERE a.identite = :nomActeur",
+                Realisateur.class
+        );
+
+        query.setParameter("nomActeur", "Brad Pitt");
+
 		List<Realisateur> acteurs = query.getResultList();
 		assertEquals(6, acteurs.size());
 	}
